@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script {
                     // Use withDockerRegistry for handling Docker registry credentials
-                    withDockerRegistry([credentialsId: 'Docker-hub-credentials', url: 'aero1602']) {
+                    withDockerRegistry([credentialsId: 'Docker-hub-credentials']) {
                         sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}"
                     }
                 }
