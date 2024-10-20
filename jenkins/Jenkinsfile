@@ -1,20 +1,17 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:14'
-        }
-    }
+    agent any
 
     environment {
-        DOCKER_REGISTRY = 'aero1602'
-        DOCKER_IMAGE = 'react-jenkins'
-        DOCKER_CREDENTIALS_ID = 'Docker-hub-credentials'
+        NODEJS_HOME = tool name: 'NodeJS 14' // Name of the NodeJS tool you configured
+        PATH = "${NODEJS_HOME}/bin:${env.PATH}"
+        DOCKER_IMAGE = 'myregistry/my-nodejs-react-app:latest' // Replace with your Docker registry URL
+        DOCKER_CREDENTIALS = 'Docker-hub-credentials' // Docker Hub/Registry credentials ID
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/Arangarajan-Aero/simple-node-js-react-npm-app.git'
+                checkout scm
             }
         }
 
@@ -26,7 +23,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'npm test'
+                sh 'npm test' // Ensure you have test scripts in package.json
             }
         }
 
@@ -36,19 +33,19 @@ pipeline {
             }
         }
 
-        stage('Package App in Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest")
+                    docker.build(DOCKER_IMAGE)
                 }
             }
         }
 
-        stage('Push Docker Image to Registry') {
+        stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").push()
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
+                        docker.image(DOCKER_IMAGE).push()
                     }
                 }
             }
@@ -57,15 +54,14 @@ pipeline {
 
     post {
         success {
-            mail to: 'user@example.com',
+            mail to: 'arangarajan16.002@gmail.com',
                  subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                 body: "Build succeeded! Job: ${env.JOB_NAME} [${env.BUILD_NUMBER}] \n Check it here: ${env.BUILD_URL}"
+                 body: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded. Check the results at ${env.BUILD_URL}."
         }
-
         failure {
-            mail to: 'user@example.com',
+            mail to: 'arangarajan16.002@gmail.com',
                  subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                 body: "Build failed! Job: ${env.JOB_NAME} [${env.BUILD_NUMBER}] \n Check it here: ${env.BUILD_URL}"
+                 body: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed. Check the results at ${env.BUILD_URL}."
         }
     }
 }
