@@ -2,12 +2,10 @@ pipeline {
     agent {
         docker {
             image 'node:14'
-            label 'docker'
         }
     }
 
     environment {
-        // Docker registry variables (replace with your values)
         DOCKER_REGISTRY = 'aero1602'
         DOCKER_IMAGE = 'react-jenkins'
         DOCKER_CREDENTIALS_ID = 'Docker-hub-credentials'
@@ -16,28 +14,24 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                // Clones the repository
                 git 'https://github.com/Arangarajan-Aero/simple-node-js-react-npm-app.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                // Install Node.js dependencies
                 sh 'npm install'
             }
         }
 
         stage('Test') {
             steps {
-                // Run tests
                 sh 'npm test'
             }
         }
 
         stage('Build React App') {
             steps {
-                // Build the React app
                 sh 'npm run build'
             }
         }
@@ -45,7 +39,6 @@ pipeline {
         stage('Package App in Docker Image') {
             steps {
                 script {
-                    // Build the Docker image
                     docker.build("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest")
                 }
             }
@@ -54,7 +47,6 @@ pipeline {
         stage('Push Docker Image to Registry') {
             steps {
                 script {
-                    // Push Docker image to the registry
                     docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
                         docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").push()
                     }
@@ -65,14 +57,12 @@ pipeline {
 
     post {
         success {
-            // Email when pipeline is successful
             mail to: 'user@example.com',
                  subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                  body: "Build succeeded! Job: ${env.JOB_NAME} [${env.BUILD_NUMBER}] \n Check it here: ${env.BUILD_URL}"
         }
 
         failure {
-            // Email when pipeline fails
             mail to: 'user@example.com',
                  subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                  body: "Build failed! Job: ${env.JOB_NAME} [${env.BUILD_NUMBER}] \n Check it here: ${env.BUILD_URL}"
