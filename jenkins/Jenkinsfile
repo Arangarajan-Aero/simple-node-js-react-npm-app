@@ -1,62 +1,62 @@
 pipeline {
     agent {
         docker {
-            image 'node:lts-buster-slim'
-            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
+            image 'node:14'
+            label 'docker'
         }
     }
-    
+
     environment {
-        DOCKER_REGISTRY = 'aero1602' // Replace with your Docker registry URL
-        DOCKER_IMAGE = 'jenkins-registry'   // Replace with your Docker image name
-        EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com'  // Replace with the recipient email address
-         PATH = "/usr/bin:${env.PATH}"
+        // Docker registry variables (replace with your values)
+        DOCKER_REGISTRY = 'aero1602'
+        DOCKER_IMAGE = 'react-jenkins'
+        DOCKER_CREDENTIALS_ID = 'Docker-hub-credentials'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
+                // Clones the repository
                 git 'https://github.com/Arangarajan-Aero/simple-node-js-react-npm-app.git'
             }
         }
-        
+
         stage('Install Dependencies') {
             steps {
+                // Install Node.js dependencies
                 sh 'npm install'
             }
         }
-        
-        stage('Run Tests') {
+
+        stage('Test') {
             steps {
+                // Run tests
                 sh 'npm test'
             }
         }
-        
-        stage('Build') {
+
+        stage('Build React App') {
             steps {
+                // Build the React app
                 sh 'npm run build'
             }
         }
-stage('Print PATH') {
-    steps {
-        sh 'echo $PATH'
-    }
-}
-        stage('Build Docker Image') {
+
+        stage('Package App in Docker Image') {
             steps {
                 script {
-                    def appVersion = "${env.BUILD_ID}"
-                    sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${appVersion} ."
+                    // Build the Docker image
+                    docker.build("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest")
                 }
             }
         }
-        
-        stage('Push Docker Image') {
+
+        stage('Push Docker Image to Registry') {
             steps {
                 script {
-                    // Use withDockerRegistry for handling Docker registry credentials
-                    withDockerRegistry([credentialsId: 'Docker-hub-credentials']) {
-                        sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}"
+                    // Push Docker image to the registry
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                        docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").push()
                     }
                 }
             }
@@ -65,14 +65,17 @@ stage('Print PATH') {
 
     post {
         success {
-            mail to: "${EMAIL_RECIPIENT}",
-                 subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "The build was successful! You can see the build details here: ${env.BUILD_URL}"
+            // Email when pipeline is successful
+            mail to: 'user@example.com',
+                 subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                 body: "Build succeeded! Job: ${env.JOB_NAME} [${env.BUILD_NUMBER}] \n Check it here: ${env.BUILD_URL}"
         }
+
         failure {
-            mail to: "${EMAIL_RECIPIENT}",
-                 subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "The build failed. Please check the details here: ${env.BUILD_URL}"
+            // Email when pipeline fails
+            mail to: 'user@example.com',
+                 subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                 body: "Build failed! Job: ${env.JOB_NAME} [${env.BUILD_NUMBER}] \n Check it here: ${env.BUILD_URL}"
         }
     }
 }
