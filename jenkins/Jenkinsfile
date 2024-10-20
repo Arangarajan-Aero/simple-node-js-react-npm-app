@@ -1,15 +1,15 @@
 pipeline {
     agent {
         docker {
-            image 'docker:19.03.12'
-            args '-u root --privileged -v /var/run/docker.sock:/var/run/docker.sock'
+            image 'node:lts-buster-slim'
+            args '-u root' // Run as root if needed
         }
     }
     
     environment {
-        DOCKER_REGISTRY = 'aero1602'
-        DOCKER_IMAGE = 'jenkins-registry'
-        EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com'
+        DOCKER_REGISTRY = 'aero1602' // Your Docker registry name
+        DOCKER_IMAGE = 'jenkins-registry' // Your Docker image name
+        EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com' // Your email
     }
 
     stages {
