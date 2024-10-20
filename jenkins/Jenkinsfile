@@ -36,7 +36,11 @@ pipeline {
                 sh 'npm run build'
             }
         }
-
+stage('Print PATH') {
+    steps {
+        sh 'echo $PATH'
+    }
+}
         stage('Build Docker Image') {
             steps {
                 script {
