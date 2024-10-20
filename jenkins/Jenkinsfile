@@ -7,9 +7,9 @@ pipeline {
     }
     
     environment {
-        DOCKER_REGISTRY = 'aero1602' // Replace with your Docker registry URL
-        DOCKER_IMAGE = 'jenkins-registry'   // Replace with your Docker image name
-        EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com'  // Replace with the recipient email address
+        DOCKER_REGISTRY = 'aero1602' // Your Docker registry name
+        DOCKER_IMAGE = 'jenkins-registry' // Your Docker image name
+        EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com' // Your email
     }
 
     stages {
@@ -49,8 +49,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Use withDockerRegistry for handling Docker registry credentials
-                    withDockerRegistry([credentialsId: 'Docker-hub-credentials', url: 'aero1602']) {
+                    withDockerRegistry([credentialsId: 'Docker-hub-credentials', url: 'https://index.docker.io/v1/']) {
                         sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}"
                     }
                 }
@@ -68,6 +67,6 @@ pipeline {
             mail to: "${EMAIL_RECIPIENT}",
                  subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "The build failed. Please check the details here: ${env.BUILD_URL}"
-        }
-    }
+        }
+    }
 }
