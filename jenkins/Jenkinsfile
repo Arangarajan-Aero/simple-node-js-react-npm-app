@@ -10,6 +10,7 @@ pipeline {
         DOCKER_REGISTRY = 'aero1602' // Replace with your Docker registry URL
         DOCKER_IMAGE = 'jenkins-registry'   // Replace with your Docker image name
         EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com'  // Replace with the recipient email address
+         PATH = "/usr/bin:${env.PATH}"
     }
 
     stages {
