@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        NODEJS_HOME = tool name: 'NodeJS 14' // Name of the NodeJS tool you configured
+        NODEJS_HOME = tool name: 'NodeJS 14.18.1' // Name of the NodeJS tool you configured
         PATH = "${NODEJS_HOME}/bin:${env.PATH}"
         DOCKER_IMAGE = 'myregistry/my-nodejs-react-app:latest' // Replace with your Docker registry URL
         DOCKER_CREDENTIALS = 'Docker-hub-credentials' // Docker Hub/Registry credentials ID
