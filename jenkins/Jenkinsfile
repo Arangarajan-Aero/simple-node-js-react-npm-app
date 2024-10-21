@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:lts-buster-slim'
+            args '-u root' // Run as root if needed
+        }
+    }
     
     environment {
         DOCKER_REGISTRY = 'aero1602' // Your Docker registry name
