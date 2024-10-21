@@ -8,14 +8,14 @@ pipeline {
     
     environment {
         DOCKER_REGISTRY = 'aero1602' // Your Docker registry name
-        DOCKER_IMAGE = 'jenkins-registry' // Your Docker image name
+        DOCKER_IMAGE = 'simple-node-js-react-npm-app' // Your Docker image name
         EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com' // Your email
     }
 
-    stages {
-        stage('Checkout') {
+     stages {
+        stage('Clean Workspace') {
             steps {
-                git 'https://github.com/Arangarajan-Aero/simple-node-js-react-npm-app.git'
+                sh 'rm -rf node_modules'
             }
         }
         
@@ -37,20 +37,24 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    def appVersion = "${env.BUILD_ID}"
-                    sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${appVersion} ."
-                }
-            }
+      stage('Build Docker Image') {
+    steps {
+        script {
+            def appVersion = "${env.BUILD_ID}"
+            sh "docker build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${appVersion} -f jenkins/Dockerfile ."
+            echo "Docker image built successfully"
+            sh 'docker images'
         }
+    }
+}
+
         
         stage('Push Docker Image') {
             steps {
                 script {
                     withDockerRegistry([credentialsId: 'Docker-hub-credentials', url: 'https://index.docker.io/v1/']) {
                         sh "docker push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${env.BUILD_ID}"
+                        echo "Docker image pushed successfully"
                     }
                 }
             }
