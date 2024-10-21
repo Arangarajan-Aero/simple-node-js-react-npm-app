@@ -9,12 +9,12 @@ pipeline {
         EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com' // Your email
     }
 
-     stages {
-        stage('Clean Workspace') {
-            steps {
-                sh 'rm -rf node_modules'
-            }
-        }
+    //  stages {
+    //     stage('Clean Workspace') {
+    //         steps {
+    //             sh 'rm -rf node_modules'
+    //         }
+    //     }
         
         stage('Install Dependencies') {
             steps {
