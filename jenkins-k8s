@@ -41,7 +41,8 @@ pipeline {
                 withCredentials([aws(credentialsId: 'aces-key', region: AWS_REGION)]) {
                     sh "aws eks update-kubeconfig --name Clops-eks-u3AHEyB0 --region ${AWS_REGION}"
                     sh 'kubectl get nodes'
-                    sh "sed -i 's#TAG#${IMAGE_TAG}#g' deployment.yaml"
+                    sh "sed -i 's#aero1602/simple-node-js-react-npm-app:3#aero1602/simple-node-js-react-npm-app:${IMAGE_TAG}#g' deployment.yaml"
+                    // sh "sed -i 's#TAG#${IMAGE_TAG}#g' deployment.yaml"
                     sh 'kubectl apply -f deployment.yaml'
                     sh 'kubectl get deployment -n dev'
                 }
