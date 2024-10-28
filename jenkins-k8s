@@ -2,16 +2,17 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'jonathan02/simple-node-js-react-npm-app'  // Adjust this to match your Docker repository
-        IMAGE_TAG = "${DOCKER_REGISTRY}:${env.BUILD_NUMBER}"  // Full image name with build number
+        DOCKER_REGISTRY = 'aero1602/simple-node-js-react-npm-app'  // Docker repository
+        IMAGE_TAG = "${DOCKER_REGISTRY}:${env.BUILD_NUMBER}"       // Full image name with build number
         AWS_REGION = 'us-east-1'
+        EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com'  // Add your email here or adjust as needed
     }
 
     stages {
         stage('Code Checkout') {
             steps {
                 echo "Checking out the application code"
-                checkout scm  // Checks out the code from the configured repository in Jenkins
+                checkout scm
             }
         }
 
@@ -26,7 +27,7 @@ pipeline {
         stage('Publish to DockerHub') {
             steps {
                 echo "Logging in to DockerHub and pushing the image"
-                withCredentials([usernamePassword(credentialsId: 'docker-credential', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                withCredentials([usernamePassword(credentialsId: 'Docker-hub-credentials', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
                     sh 'echo ${PASSWORD} | docker login -u ${USERNAME} --password-stdin'
                     sh 'docker push ${IMAGE_TAG}'
                 }
@@ -38,17 +39,28 @@ pipeline {
             steps {
                 echo "Deploying to EKS Cluster"
                 withCredentials([aws(credentialsId: 'aws-credentials', region: AWS_REGION)]) {
-                    sh 'aws eks update-kubeconfig --name my-eks-CqtrLBou --region ap-south-1'
+                    sh "aws eks update-kubeconfig --name my-eks-CqtrLBou --region ${AWS_REGION}"
                     sh 'kubectl get nodes'
-                    sh "sed -i 's#TAG#${IMAGE_TAG}#g' deployment.yaml"  // Replace TAG in deployment.yaml with the actual image tag
+                    sh "sed -i 's#TAG#${IMAGE_TAG}#g' deployment.yaml"
                     sh 'kubectl apply -f deployment.yaml'
                     sh 'kubectl get deployment -n dev'
                 }
                 echo "Deployed to EKS Cluster"
             }
         }
+    }
 
     post {
+        success {
+            mail to: "${EMAIL_RECIPIENT}",
+                 subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "The build was successful! You can see the build details here: ${env.BUILD_URL}"
+        }
+        failure {
+            mail to: "${EMAIL_RECIPIENT}",
+                 subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: "The build failed. Please check the details here: ${env.BUILD_URL}"
+        }
         always {
             cleanWs()  // Clean up the workspace after the pipeline completes
         }
