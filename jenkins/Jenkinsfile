@@ -9,7 +9,7 @@ pipeline {
     
     environment {
         DOCKER_REGISTRY = 'aero1602' // Your Docker registry name
-        DOCKER_IMAGE = 'simple-node-js-react-npm-app' // Your Docker image name
+        DOCKER_IMAGE = "simple-node-js-react-npm-app:${BUILD_NUMBER}" // Your Docker image name
         EMAIL_RECIPIENT = 'arangarajan16.002@gmail.com' // Your email
     }
 
