@@ -39,7 +39,7 @@ pipeline {
             steps {
                 echo "Deploying to EKS Cluster"
                 withCredentials([aws(credentialsId: 'aces-key', region: AWS_REGION)]) {
-                    sh "aws eks update-kubeconfig --name my-eks-CqtrLBou --region ${AWS_REGION}"
+                    sh "aws eks update-kubeconfig --name Clops-eks-u3AHEyB0 --region ${AWS_REGION}"
                     sh 'kubectl get nodes'
                     sh "sed -i 's#TAG#${IMAGE_TAG}#g' deployment.yaml"
                     sh 'kubectl apply -f deployment.yaml'
